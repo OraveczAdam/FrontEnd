@@ -1,0 +1,496 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+  /* Font loaded via <link> in index.html */
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+/* Arcade styles moved from test.html */
+.side-bar {
+  position: fixed;
+  top: 70px;
+  bottom: 0;
+  width: 35px;
+  background: black;
+  z-index: 3000;
+}
+.side-bar.left {
+  left: 0;
+  border-right: 2px solid #222;
+}
+.side-bar.right {
+  right: 0;
+  border-left: 2px solid #222;
+}
+/* Make game cards grow on hover */
+.game-card {
+  transition: transform 0.2s cubic-bezier(0.4, 2, 0.6, 1);
+}
+.game-card:hover {
+  transform: scale(1.12);
+  z-index: 10;
+}
+/* Set the arcade screen background */
+body {
+  background-image: url('./assets/arcade.png');
+  margin: 0;
+  padding: 0;
+  background-size: cover;
+  font-family: 'Press Start 2P', cursive;
+  color: white;
+  padding-top: 50px;
+}
+
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: rgba(0, 0, 0, 0.8);
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+}
+
+li {
+  float: left;
+}
+
+li a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+li a:hover {
+  background-color: green;
+}
+
+li:last-child {
+  margin-left: 2px;
+}
+
+form {
+  margin: 20px auto;
+  width: 300px;
+  text-align: center;
+}
+
+input, button {
+  display: block;
+  width: 100%;
+  margin: 10px 0;
+  padding: 10px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 12px;
+  border: 2px solid white;
+  background-color: black;
+  color: white;
+}
+
+button:hover {
+  background-color: green;
+  color: black;
+}
+
+header.arcade-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0,0,0,0.85);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 70px;
+  z-index: 2000;
+  padding: 0 30px;
+  box-sizing: border-box;
+}
+.mute-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  outline: none;
+}
+.arcade-title {
+  font-size: 20px;
+  letter-spacing: 2px;
+  font-family: 'Press Start 2P', cursive;
+}
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+.dropdown-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 25px;
+  cursor: pointer;
+  font-family: 'Press Start 2P', cursive;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dropdown-btn .rotate {
+  display: inline-block;
+}
+.dropdown-content {
+  display: none;
+  position: absolute;
+  right: 0;
+  background-color: #222;
+  min-width: 120px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 3000;
+  border: 1px solid #444;
+  border-radius: 5px;
+}
+.dropdown-content a {
+  color: white;
+  padding: 10px 16px;
+  text-decoration: none;
+  display: block;
+  font-size: 14px;
+  font-family: 'Press Start 2P', cursive;
+}
+.dropdown-content a:hover {
+  background-color: green;
+  color: black;
+}
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+.card-style {
+  width: 200px;
+  background-color: rgba(0, 0, 0, 0.8);
+  border: 2px solid white;
+  border-radius: 10px;
+  padding: 10px;
+  text-align: center;
+}
+.card-style img {
+  width: 100%;
+  height: auto;
+  border-radius: 5px;
+}
+
+/* Header actions (top-right compact button) */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.header-action-btn {
+  background: none;
+  border: 2px solid transparent;
+  color: white;
+  font-family: 'Press Start 2P', cursive;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.header-action-btn:hover {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.08);
+  color: #b8ffb8;
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+  header.arcade-header {
+    padding: 0 16px;
+  }
+  .arcade-title {
+    font-size: 16px;
+  }
+  .card-style {
+    width: 160px;
+  }
+}
+
+@media (max-width: 640px) {
+  .side-bar { display: none; }
+  body { padding-top: 60px; }
+  header.arcade-header { height: 56px; }
+  .arcade-title { font-size: 12px; }
+  .card-style { width: 140px; }
+  form { width: 90%; margin: 12px auto; }
+  input, button { font-size: 14px; padding: 12px; }
+  .game-card:hover { transform: none; }
+}
+
+.arcade-main {
+  text-align: center;
+  margin-top: 100px;
+  padding: 20px;
+}
+
+.screen-title {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 28px;
+  margin-bottom: 40px;
+  color: #ffffff;
+}
+
+.error-text {
+  color: #ff8080;
+  margin-bottom: 20px;
+}
+
+/* 4 kártya / sor desktopon */
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Tablet */
+@media (max-width: 1100px) {
+  .profile-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobil */
+@media (max-width: 600px) {
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Kártyák (profil + leaderboard) */
+.profile-card {
+  border: 2px solid #2cff6d;
+  border-radius: 10px;
+  padding: 16px 24px;
+  background: rgba(0, 0, 0, 0.45);
+  color: #c8ffd9;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.6);
+}
+
+.profile-card-section {
+  margin-bottom: 14px;
+}
+
+.profile-label {
+  font-size: 0.8rem;
+  opacity: 0.75;
+  margin-bottom: 4px;
+}
+
+.profile-value {
+  font-size: 1.2rem;
+}
+
+.score-table {
+  margin-top: 6px;
+}
+
+.score-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 0;
+  font-size: 0.9rem;
+}
+
+.score-row.header {
+  border-bottom: 1px solid #2cff6d;
+  margin-bottom: 4px;
+  font-weight: bold;
+}
+
+.profile-page-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.profile-main-card {
+  max-width: 360px;
+  width: 100%;
+  border: 2px solid #2cff6d;
+  border-radius: 10px;
+  padding: 20px 28px;
+  background: rgba(0, 0, 0, 0.45);
+  color: #c8ffd9;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.6);
+}
+
+/* === Leaderboard layout === */
+
+.page-container {
+  text-align: center;
+  margin-top: 100px;
+  padding: 20px;
+}
+
+.page-title {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 32px;
+  margin-bottom: 24px;
+}
+
+/* 🔍 Keresőmező középen */
+.leaderboard-search-wrapper {
+  display: flex;
+  justify-content: center;
+  margin: 24px 0 40px 0;
+}
+
+.leaderboard-search {
+  width: 280px;
+  padding: 10px 14px;
+  font-family: inherit;
+  font-size: 14px;
+
+  background: #000;
+  color: #00ff99;
+
+  border: 2px solid #00ff99;
+  border-radius: 6px;
+  outline: none;
+}
+
+.leaderboard-search::placeholder {
+  color: #66ffcc;
+}
+
+/* Info / error szövegek */
+.info-text {
+  margin-top: 20px;
+  color: #ffffff;
+}
+
+.error-text {
+  margin-top: 20px;
+  color: #ff6666;
+}
+
+/* ⚙️ 4 oszlopos kártyarács */
+.leaderboard-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(220px, 1fr));
+  gap: 32px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto 60px auto;
+}
+
+/* Ha nincs találat – szöveg középen, rácsban is jól mutat */
+.no-user-text {
+  grid-column: 1 / -1;
+  text-align: center;
+  margin-top: 40px;
+  color: #ff6666;
+  font-size: 16px;
+}
+
+/* Kártyastílus – ugyanaz, mint a profilnál (ha már létezik nálad,
+   akkor ezt NEM muszáj duplázni, csak győződj meg róla, hogy a
+   .profile-card és társai be vannak állítva!) */
+
+.profile-card {
+  border: 3px solid #00ff99;
+  border-radius: 12px;
+  padding: 16px 24px;
+  background: rgba(0, 0, 0, 0.4);
+  color: #ffffff;
+  text-align: left;
+  max-width: 260px;
+  margin: 0 auto;
+}
+
+.profile-card-header {
+  border-bottom: 2px solid #00ff99;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+
+.profile-card-label {
+  color: #66ffcc;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.profile-card-value {
+  font-size: 18px;
+}
+
+.profile-card-body-title {
+  text-align: center;
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+
+.profile-card-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  margin: 2px 0;
+}
+
+/* Reszponzív törések (ajánlott) */
+@media (max-width: 1100px) {
+  .leaderboard-grid {
+    grid-template-columns: repeat(3, minmax(220px, 1fr));
+  }
+}
+
+@media (max-width: 800px) {
+  .leaderboard-grid {
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
+  }
+}
+
+@media (max-width: 500px) {
+  .leaderboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
