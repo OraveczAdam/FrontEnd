@@ -3,6 +3,7 @@ import './Game3.css'
 import snakeBack from '../assets/SnakeBack.png'
 import { useAuth } from '../auth/AuthProvider'
 import { submitScore } from '../services/gameService'
+import { useNavigate } from 'react-router-dom'
 
 export default function Game3() {
   const centerRef = useRef(null)
@@ -17,11 +18,13 @@ export default function Game3() {
   const [score, setScore] = useState(0)
   const scoreRef = useRef(0)
   const [ended, setEnded] = useState(false)
+  const endedRef = useRef(false)
 
   const CELL = 28 // bigger cells for larger snake/food
   const BASE_DELAY = 120
 
   const auth = useAuth()
+  const navigate = useNavigate()
 
   const particlesRef = useRef([])
   const touchStartRef = useRef(null)
@@ -76,8 +79,22 @@ export default function Game3() {
   const bgImageRef = useRef(null)
   useEffect(() => {
     const img = new Image()
+    img.onload = () => {
+      bgImageRef.current = img
+      // redraw now that background is ready
+      try { draw() } catch (err) { console.debug('draw after bg load failed', err) }
+    }
+    img.onerror = (err) => {
+      console.debug('background image failed to load', err)
+      // still set it so draw uses fill fallback
+      bgImageRef.current = img
+    }
     img.src = snakeBack
-    bgImageRef.current = img
+    // if cached and already complete, trigger draw immediately
+    if (img.complete) {
+      bgImageRef.current = img
+      try { draw() } catch (err) { console.debug('draw after bg load failed', err) }
+    }
   }, [])
 
   function spawnFood() {
@@ -106,6 +123,7 @@ export default function Game3() {
     setScore(0)
     setRunning(false)
     setEnded(false)
+    endedRef.current = false
     draw()
   }
 
@@ -151,7 +169,13 @@ export default function Game3() {
     // Accept Space (code or key) to start
     if (e.code === 'Space' || e.key === ' ') {
       e.preventDefault()
-      if (!running) startLoop()
+      // If game ended, restart and immediately start playing
+      if (endedRef.current) {
+        try { restart() } catch (err) { console.debug('restart failed', err) }
+        startLoop()
+      } else if (!running) {
+        startLoop()
+      }
       return
     }
 
@@ -220,6 +244,7 @@ export default function Game3() {
       submitScore('Snake', scoreRef.current, userId)
     }
     setEnded(true)
+    endedRef.current = true
   }
 
   function step() {
@@ -331,6 +356,15 @@ export default function Game3() {
       <div className="arcade-frame">
         <div className="screen-top" />
         <div className="score">Score: {score}</div>
+        <div
+          className="back"
+          role="button"
+          tabIndex={0}
+          onClick={() => navigate('/')}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') navigate('/') }}
+        >
+          Back
+        </div>
         <div className="screen-sides-and-center">
           <div className="screen-side left" />
           <div
@@ -394,11 +428,7 @@ export default function Game3() {
         <div className="screen-bottom" />
       </div>
 
-      <div className="game3-controls">
-        <button className="restart-btn" onClick={restart}>
-          Restart
-        </button>
-      </div>
+      {/* Restart button removed — use Space or overlay to restart */}
       {/* Score rendered inside arcade frame */}
       {/* Touch controls for mobile */}
       <div className="touch-controls" aria-hidden={running ? 'false' : 'false'}>

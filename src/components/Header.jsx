@@ -40,21 +40,18 @@ function Header({
     } else if (path === '/profile') {
       // Profilon: Main + Leaderboard
       menuItems = [
-        { label: 'Main', to: '/' },
         { label: 'Leaderboard', to: '/leaderboard' },
         { label: 'Logout', action: handleLogout }
       ]
     } else if (path === '/leaderboard') {
       // Leaderboardon: Main + Profil
       menuItems = [
-        { label: 'Main', to: '/' },
         { label: 'Profil', to: '/profile' },
         { label: 'Logout', action: handleLogout }
       ]
     } else {
       // Egyéb védett oldalakon – fallback
       menuItems = [
-        { label: 'Main', to: '/' },
         { label: 'Profil', to: '/profile' },
         { label: 'Leaderboard', to: '/leaderboard' },
         { label: 'Logout', action: handleLogout }
