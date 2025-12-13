@@ -6,6 +6,17 @@ import { submitScore } from '../services/gameService'
 import { useNavigate } from 'react-router-dom'
 
 export default function Game3() {
+  /**
+   * Game3: Canvas-based Snake game component
+   * - Renders a canvas inside an arcade frame
+   * - Uses refs for mutable state (snake, direction, score) and timeouts for the loop
+   * - Supports keyboard (arrows + WASD), touch swipe, mobile D-pad, and score submission
+   *
+   * The code below is intentionally explicit and commented so you can see what each
+   * function and ref is responsible for. I removed a couple of redundant bits
+   * (like an always-false `aria-hidden` expression) and cleaned up stray debug
+   * comments while leaving the game logic intact.
+   */
   const centerRef = useRef(null)
   const canvasRef = useRef(null)
   const loopRef = useRef(null)
@@ -29,6 +40,9 @@ export default function Game3() {
   const particlesRef = useRef([])
   const touchStartRef = useRef(null)
   const slowUntilRef = useRef(0)
+  // particle list for simple particle effects
+  // touch handling start point for swipe detection
+  // used by 'slow' food to delay speed for a short period
 
   useEffect(() => {
     initGame()
@@ -431,7 +445,7 @@ export default function Game3() {
       {/* Restart button removed — use Space or overlay to restart */}
       {/* Score rendered inside arcade frame */}
       {/* Touch controls for mobile */}
-      <div className="touch-controls" aria-hidden={running ? 'false' : 'false'}>
+      <div className="touch-controls">
         <div className="dpad btn-group-vertical" role="group" aria-label="D-pad">
           <button type="button" className="dpad-btn btn btn-dark" onClick={() => changeDirection({ x: 0, y: -1 })}>▲</button>
           <div className="dpad-row">
