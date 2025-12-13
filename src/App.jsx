@@ -7,6 +7,7 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import Profile from './pages/Profile'
 import Leaderboard from './pages/Leaderboard'
+import Game3 from './pages/Game3'
 import Header from './components/Header'
 import bgMusic from './assets/AI created 8 Bits theme  Retro Gaming Music.mp3'
 import { AuthProvider, RequireAuth } from './auth/AuthProvider'
@@ -100,6 +101,8 @@ function AppContent() {
             </RequireAuth>
           }
         />
+
+        <Route path="/game3" element={<Game3 />} />
 
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
