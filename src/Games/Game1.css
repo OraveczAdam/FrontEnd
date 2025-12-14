@@ -37,10 +37,25 @@
   position: relative;
   width: 100%;
   flex: 1 1 auto;
-  background: #063b1f; /* dark green playfield */
+  background-image: url('../assets/aliens/starfield.svg');
+  background-size: cover;
+  background-position: center;
+  background-color: #001018; /* fallback deep space color */
   border-radius: 8px;
   overflow: hidden;
 }
+
+/* subtle brighten overlay for starfield only (placed under the canvas) */
+.game1-canvas-wrap::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.06);
+  pointer-events: none;
+  z-index: 1;
+  border-radius: 8px;
+}
+.game1-canvas-wrap canvas { z-index: 2; position: relative; }
 
 .game1-canvas-wrap canvas {
   width: 100%;

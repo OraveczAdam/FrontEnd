@@ -1,5 +1,9 @@
 import React, { useRef, useEffect, useState } from 'react'
 import './Game1.css'
+import ship1Url from '../assets/aliens/ship1.svg'
+import ship1Png from '../assets/aliens/ship1.png'
+import ship2Url from '../assets/aliens/ship2.svg'
+import ship3Url from '../assets/aliens/ship3.svg'
 import { useNavigate } from 'react-router-dom'
 
 export default function Game1() {
@@ -11,7 +15,7 @@ export default function Game1() {
   const endedRef = useRef(false)
 
   // game objects in refs to avoid rerenders each frame
-  const playerRef = useRef({ x: 40, y: 100, w: 22, h: 22 })
+  const playerRef = useRef({ x: 40, y: 100, w: 56, h: 56 })
   const bulletsRef = useRef([])
   const enemiesRef = useRef([])
 
@@ -21,6 +25,10 @@ export default function Game1() {
   const [running, setRunning] = useState(false)
   const [ended, setEnded] = useState(false)
   const navigate = useNavigate()
+
+  // sprite images refs
+  const enemyImgsRef = useRef([])
+  const playerImgRef = useRef(null)
 
   // sizing
   function resizeCanvas() {
@@ -42,7 +50,7 @@ export default function Game1() {
     const canvas = canvasRef.current
     if (!canvas) return
     const h = canvas.clientHeight
-    const size = 22 + Math.random() * 18
+    const size = 36 + Math.random() * 28
     const y = Math.max(8, Math.random() * (h - size - 8))
     enemiesRef.current.push({
       x: canvas.clientWidth + 10,
@@ -50,7 +58,8 @@ export default function Game1() {
       w: size,
       h: size,
       vx: - (2 + Math.random() * 3),
-      hp: 1
+      hp: 1,
+      sprite: Math.floor(Math.random() * 3)
     })
   }
 
@@ -114,21 +123,32 @@ export default function Game1() {
     // draw
     ctx.clearRect(0, 0, w, h)
 
-    // background: dark green to match CSS playfield
-    ctx.fillStyle = '#063b1f'
-    ctx.fillRect(0, 0, w, h)
-
-    // player
-    ctx.fillStyle = '#7cf77c'
-    ctx.fillRect(player.x, player.y, player.w, player.h)
+    // player sprite (processed PNG or SVG). draw rotated to face right
+    const pImg = playerImgRef.current
+    if (pImg && pImg.complete) {
+      ctx.save()
+      const cx = player.x + player.w / 2
+      const cy = player.y + player.h / 2
+      ctx.translate(cx, cy)
+      ctx.rotate(Math.PI / 2) // rotate 90deg clockwise
+      ctx.drawImage(pImg, -player.w / 2, -player.h / 2, player.w, player.h)
+      ctx.restore()
+    } else {
+      ctx.fillStyle = '#7cf77c'
+      ctx.fillRect(player.x, player.y, player.w, player.h)
+    }
 
     // bullets
     ctx.fillStyle = '#ffd86b'
     bulletsRef.current.forEach((b) => ctx.fillRect(b.x, b.y, b.w, b.h))
 
-    // enemies
-    ctx.fillStyle = '#ff6b6b'
-    enemiesRef.current.forEach((e) => ctx.fillRect(e.x, e.y, e.w, e.h))
+    // enemies as sprites with rectangle fallback
+    enemiesRef.current.forEach((e) => {
+      const imgs = enemyImgsRef.current || []
+      const img = imgs[e.sprite]
+      if (img && img.complete) ctx.drawImage(img, e.x, e.y, e.w, e.h)
+      else { ctx.fillStyle = '#ff6b6b'; ctx.fillRect(e.x, e.y, e.w, e.h) }
+    })
 
     // HUD removed from canvas; score is shown in DOM element for consistency with Game3
 
@@ -200,6 +220,47 @@ export default function Game1() {
   }
 
   useEffect(() => {
+    // preload ship sprites for player/enemies
+    try {
+      const i2 = new Image(); i2.src = ship2Url
+      const i3 = new Image(); i3.src = ship3Url
+      enemyImgsRef.current = [i2, i3]
+
+      // load the PNG (user-provided) and remove green background in-browser
+      const raw = new Image()
+      raw.crossOrigin = 'anonymous'
+      // load PNG and remove white background in-browser, producing a transparent sprite
+      raw.onload = () => {
+        try {
+          const off = document.createElement('canvas')
+          off.width = raw.width
+          off.height = raw.height
+          const ox = off.getContext('2d')
+          ox.drawImage(raw, 0, 0)
+          const imgd = ox.getImageData(0, 0, off.width, off.height)
+          const data = imgd.data
+          const tol = 30 // tolerance for "near-white"
+          for (let i = 0; i < data.length; i += 4) {
+            const r = data[i], g = data[i + 1], b = data[i + 2]
+            if (r >= 255 - tol && g >= 255 - tol && b >= 255 - tol) {
+              data[i + 3] = 0
+            }
+          }
+          ox.putImageData(imgd, 0, 0)
+          const processed = new Image()
+          processed.onload = () => { playerImgRef.current = processed }
+          processed.src = off.toDataURL('image/png')
+        } catch (err) {
+          console.debug('png processing failed', err)
+          playerImgRef.current = raw
+        }
+      }
+      raw.onerror = () => {
+        // fallback to bundled svg
+        const svgi = new Image(); svgi.src = ship1Url; playerImgRef.current = svgi
+      }
+      raw.src = ship1Png
+    } catch (err) { console.debug('sprite preload failed', err) }
     resizeCanvas()
     window.addEventListener('resize', resizeCanvas)
     window.addEventListener('keydown', handleKey)
@@ -209,8 +270,7 @@ export default function Game1() {
     const canvas = canvasRef.current
     if (canvas) {
       const ctx = canvas.getContext('2d')
-      ctx.fillStyle = '#081B07'
-      ctx.fillRect(0, 0, canvas.clientWidth, canvas.clientHeight)
+      ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight)
     }
     return () => {
       window.removeEventListener('resize', resizeCanvas)
