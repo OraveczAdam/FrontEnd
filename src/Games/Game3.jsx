@@ -358,6 +358,8 @@ export default function Game3() {
       ctx.fillRect(p.x, p.y, 3, 3)
       if (p.life <= 0) parts.splice(i, 1)
     }
+
+    // HUD is rendered in the DOM for consistency with Game1
   }
 
   function restart() {
@@ -369,7 +371,6 @@ export default function Game3() {
     <div className="game3-page">
       <div className="arcade-frame">
         <div className="screen-top" />
-        <div className="score">Score: {score}</div>
         <div
           className="back"
           role="button"
@@ -379,6 +380,7 @@ export default function Game3() {
         >
           Back
         </div>
+        <div className="score">Score: {score}</div>
         <div className="screen-sides-and-center">
           <div className="screen-side left" />
           <div
@@ -432,7 +434,7 @@ export default function Game3() {
                 }}
               >
                 <div className="start-text">
-                  {ended ? `Game Over — Score ${scoreRef.current}` : 'Press Space to Start'}
+                  {ended ? `Game Over — Score ${score}` : 'Press Space to Start'}
                 </div>
               </div>
             )}

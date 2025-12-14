@@ -17,6 +17,7 @@ export default function Game1() {
 
   // UI state
   const [score, setScore] = useState(0)
+  const scoreRef = useRef(0)
   const [running, setRunning] = useState(false)
   const [ended, setEnded] = useState(false)
   const navigate = useNavigate()
@@ -53,9 +54,16 @@ export default function Game1() {
     })
   }
 
-  // simple AABB collision
-  function collide(a, b) {
-    return !(a.x + a.w < b.x || a.x > b.x + b.w || a.y + a.h < b.y || a.y > b.y + b.h)
+  // no background image — draw a solid black playfield
+
+  // simple AABB collision with optional padding
+  function collide(a, b, pad = 0) {
+    return !(
+      a.x + a.w + pad < b.x - pad ||
+      a.x - pad > b.x + b.w + pad ||
+      a.y + a.h + pad < b.y - pad ||
+      a.y - pad > b.y + b.h + pad
+    )
   }
 
   // main update + draw loop
@@ -75,12 +83,14 @@ export default function Game1() {
       const e = enemiesRef.current[i]
       for (let j = bulletsRef.current.length - 1; j >= 0; j--) {
         const b = bulletsRef.current[j]
-        if (collide(e, b)) {
-          enemiesRef.current.splice(i, 1)
-          bulletsRef.current.splice(j, 1)
-          setScore((s) => s + 1)
-          break
-        }
+        if (collide(e, b, 1)) {
+              enemiesRef.current.splice(i, 1)
+              bulletsRef.current.splice(j, 1)
+              // update ref + state so the animation loop sees latest value
+              scoreRef.current = (scoreRef.current || 0) + 1
+              setScore(scoreRef.current)
+              break
+            }
       }
     }
 
@@ -104,8 +114,8 @@ export default function Game1() {
     // draw
     ctx.clearRect(0, 0, w, h)
 
-    // background
-    ctx.fillStyle = '#081B07'
+    // background: dark green to match CSS playfield
+    ctx.fillStyle = '#063b1f'
     ctx.fillRect(0, 0, w, h)
 
     // player
@@ -120,10 +130,7 @@ export default function Game1() {
     ctx.fillStyle = '#ff6b6b'
     enemiesRef.current.forEach((e) => ctx.fillRect(e.x, e.y, e.w, e.h))
 
-    // HUD
-    ctx.fillStyle = '#66ffcc'
-    ctx.font = '14px monospace'
-    ctx.fillText('Score: ' + score, 12, 18)
+    // HUD removed from canvas; score is shown in DOM element for consistency with Game3
 
     // continue
     rafRef.current = requestAnimationFrame(loop)
@@ -139,6 +146,7 @@ export default function Game1() {
     bulletsRef.current = []
     enemiesRef.current = []
     playerRef.current.y = (canvasRef.current ? canvasRef.current.clientHeight / 2 : 120)
+    scoreRef.current = 0
     setScore(0)
     // spawn interval
     spawnRef.current = setInterval(spawnEnemy, 900)
@@ -177,7 +185,15 @@ export default function Game1() {
     }
     if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
       playerRef.current.y += 18
+      // clamp to bottom of canvas so player can't leave the map
+      const canvas = canvasRef.current
+      if (canvas) {
+        const maxY = canvas.clientHeight - playerRef.current.h - 4
+        if (playerRef.current.y > maxY) playerRef.current.y = maxY
+      }
     }
+    // ensure top clamp as well (in case of fast repeated moves)
+    if (playerRef.current.y < 4) playerRef.current.y = 4
     if (e.key === 'r' || e.key === 'R') {
       restartGame()
     }
@@ -187,19 +203,19 @@ export default function Game1() {
     resizeCanvas()
     window.addEventListener('resize', resizeCanvas)
     window.addEventListener('keydown', handleKey)
+    // set the site background to black while this page is mounted
+    try { document.body.classList.add('page-game1') } catch (err) { console.debug('add body class failed', err) }
     // initial draw
     const canvas = canvasRef.current
     if (canvas) {
       const ctx = canvas.getContext('2d')
       ctx.fillStyle = '#081B07'
       ctx.fillRect(0, 0, canvas.clientWidth, canvas.clientHeight)
-      ctx.fillStyle = '#66ffcc'
-      ctx.font = '14px monospace'
-      ctx.fillText('Press Space to start', 12, 18)
     }
     return () => {
       window.removeEventListener('resize', resizeCanvas)
       window.removeEventListener('keydown', handleKey)
+      try { document.body.classList.remove('page-game1') } catch (err) { console.debug('remove body class failed', err) }
       stopGame()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -208,6 +224,8 @@ export default function Game1() {
   return (
     <div className="game1-page">
       <div className="game1-frame">
+        <div className="frame-top" />
+        <div className="score">Score: {score}</div>
         <div
           className="back"
           role="button"
