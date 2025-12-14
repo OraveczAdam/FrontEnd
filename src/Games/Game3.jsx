@@ -31,7 +31,7 @@ export default function Game3() {
   const [ended, setEnded] = useState(false)
   const endedRef = useRef(false)
 
-  const CELL = 28 // bigger cells for larger snake/food
+  const CELL = 22 // reduced cell size to better fit 16:9 1080p
   const BASE_DELAY = 120
 
   const auth = useAuth()
