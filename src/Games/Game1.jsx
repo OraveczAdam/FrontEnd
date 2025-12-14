@@ -1,13 +1,11 @@
 import React, { useRef, useEffect, useState } from 'react'
 import './Game1.css'
-import ship1Url from '../assets/aliens/ship1.svg'
 import ship1Png from '../assets/aliens/ship1.png'
-import ship2Url from '../assets/aliens/ship2.svg'
-import ship3Url from '../assets/aliens/ship3.svg'
+import enemyPng from '../assets/aliens/Enemy.png'
+import asteroidPng from '../assets/aliens/Asteroid.png'
 import { useNavigate } from 'react-router-dom'
 
 export default function Game1() {
-  // refs for canvas and mutable game state
   const canvasRef = useRef(null)
   const rafRef = useRef(null)
   const spawnRef = useRef(null)
@@ -15,7 +13,7 @@ export default function Game1() {
   const endedRef = useRef(false)
 
   // game objects in refs to avoid rerenders each frame
-  const playerRef = useRef({ x: 40, y: 100, w: 56, h: 56 })
+  const playerRef = useRef({ x: 40, y: 100, w: 80, h: 80 })
   const bulletsRef = useRef([])
   const enemiesRef = useRef([])
 
@@ -59,7 +57,8 @@ export default function Game1() {
       h: size,
       vx: - (2 + Math.random() * 3),
       hp: 1,
-      sprite: Math.floor(Math.random() * 3)
+      // sprite: 0 = enemy ship image, 1 = asteroid
+      sprite: Math.floor(Math.random() * 2)
     })
   }
 
@@ -168,7 +167,56 @@ export default function Game1() {
     playerRef.current.y = (canvasRef.current ? canvasRef.current.clientHeight / 2 : 120)
     scoreRef.current = 0
     setScore(0)
-    // spawn interval
+    // reset player x position
+    playerRef.current.x = 40
+    try {
+      // helper: load image and remove white/green background in-browser
+      const loadAndProcess = (src, cb) => {
+        const img = new Image(); img.crossOrigin = 'anonymous'; img.src = src
+        img.onload = () => {
+          try {
+            const off = document.createElement('canvas')
+            off.width = img.width
+            off.height = img.height
+            const ox = off.getContext('2d')
+            ox.drawImage(img, 0, 0)
+            const imgd = ox.getImageData(0, 0, off.width, off.height)
+            const data = imgd.data
+            const tol = 30
+            for (let i = 0; i < data.length; i += 4) {
+              const r = data[i], g = data[i + 1], b = data[i + 2]
+              // Only remove near-white background; keep greens intact
+              if (r >= 255 - tol && g >= 255 - tol && b >= 255 - tol) {
+                data[i + 3] = 0
+              }
+            }
+            ox.putImageData(imgd, 0, 0)
+            const proc = new Image()
+            proc.onload = () => cb(proc)
+            proc.src = off.toDataURL('image/png')
+          } catch (err) { console.debug('process failed', err); cb(img) }
+        }
+        img.onerror = () => { cb(null) }
+      }
+
+      // load and process enemy and asteroid images
+      loadAndProcess(enemyPng, (res) => { if (res) enemyImgsRef.current[0] = res })
+      loadAndProcess(asteroidPng, (res) => { if (res) enemyImgsRef.current[1] = res })
+
+      // svg fallbacks for enemies if PNGs not available (no SVGs used)
+      const i2 = new Image()
+      const i3 = new Image()
+      // ensure array has entries
+      if (!enemyImgsRef.current[0]) enemyImgsRef.current[0] = i2
+      if (!enemyImgsRef.current[1]) enemyImgsRef.current[1] = i3
+
+      // process player PNG as well (remove near-white background)
+      loadAndProcess(ship1Png, (res) => {
+        if (res) playerImgRef.current = res
+        else playerImgRef.current = null
+      })
+    } catch (err) { console.debug('sprite preload failed', err) }
+    // start spawning enemies and the render loop
     spawnRef.current = setInterval(spawnEnemy, 900)
     rafRef.current = requestAnimationFrame(loop)
   }
@@ -185,48 +233,58 @@ export default function Game1() {
     startGame()
   }
 
-  // controls: up/down to move, Space to shoot / start, R to restart
   function handleKey(e) {
     if (e.code === 'Space' || e.key === ' ') {
       e.preventDefault()
-      if (endedRef.current) {
-        restartGame()
-        return
-      }
-      // shoot
+      if (endedRef.current) { restartGame(); return }
       const p = playerRef.current
       bulletsRef.current.push({ x: p.x + p.w + 4, y: p.y + p.h / 2 - 4, w: 8, h: 8, vx: 8 })
       if (!runningRef.current) startGame()
       return
     }
+
     if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
       playerRef.current.y -= 18
       if (playerRef.current.y < 4) playerRef.current.y = 4
     }
     if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
       playerRef.current.y += 18
-      // clamp to bottom of canvas so player can't leave the map
       const canvas = canvasRef.current
       if (canvas) {
         const maxY = canvas.clientHeight - playerRef.current.h - 4
         if (playerRef.current.y > maxY) playerRef.current.y = maxY
       }
     }
-    // ensure top clamp as well (in case of fast repeated moves)
-    if (playerRef.current.y < 4) playerRef.current.y = 4
-    if (e.key === 'r' || e.key === 'R') {
-      restartGame()
+    if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+      playerRef.current.x -= 18
+      const canvas = canvasRef.current
+      if (canvas) {
+        const minX = 4
+        if (playerRef.current.x < minX) playerRef.current.x = minX
+      }
     }
+    if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+      playerRef.current.x += 18
+      const canvas = canvasRef.current
+      if (canvas) {
+        const maxX = canvas.clientWidth - playerRef.current.w - 4
+        if (playerRef.current.x > maxX) playerRef.current.x = maxX
+      }
+    }
+
+    // ensure vertical clamp
+    if (playerRef.current.y < 4) playerRef.current.y = 4
+    if (e.key === 'r' || e.key === 'R') restartGame()
   }
 
   useEffect(() => {
     // preload ship sprites for player/enemies
     try {
-      const i2 = new Image(); i2.src = ship2Url
-      const i3 = new Image(); i3.src = ship3Url
+      const i2 = new Image()
+      const i3 = new Image()
       enemyImgsRef.current = [i2, i3]
 
-      // load the PNG (user-provided) and remove green background in-browser
+      // load the PNG (user-provided) and remove white background in-browser
       const raw = new Image()
       raw.crossOrigin = 'anonymous'
       // load PNG and remove white background in-browser, producing a transparent sprite
@@ -242,6 +300,7 @@ export default function Game1() {
           const tol = 30 // tolerance for "near-white"
           for (let i = 0; i < data.length; i += 4) {
             const r = data[i], g = data[i + 1], b = data[i + 2]
+            // Only remove near-white pixels
             if (r >= 255 - tol && g >= 255 - tol && b >= 255 - tol) {
               data[i + 3] = 0
             }
@@ -256,8 +315,8 @@ export default function Game1() {
         }
       }
       raw.onerror = () => {
-        // fallback to bundled svg
-        const svgi = new Image(); svgi.src = ship1Url; playerImgRef.current = svgi
+        // no SVG fallback — leave playerImg null to use rectangle fallback
+        playerImgRef.current = null
       }
       raw.src = ship1Png
     } catch (err) { console.debug('sprite preload failed', err) }
