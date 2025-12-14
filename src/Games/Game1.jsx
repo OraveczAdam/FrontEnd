@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react'
 import './Game1.css'
+import { useNavigate } from 'react-router-dom'
 
 export default function Game1() {
   // refs for canvas and mutable game state
@@ -18,6 +19,7 @@ export default function Game1() {
   const [score, setScore] = useState(0)
   const [running, setRunning] = useState(false)
   const [ended, setEnded] = useState(false)
+  const navigate = useNavigate()
 
   // sizing
   function resizeCanvas() {
@@ -206,6 +208,15 @@ export default function Game1() {
   return (
     <div className="game1-page">
       <div className="game1-frame">
+        <div
+          className="back"
+          role="button"
+          tabIndex={0}
+          onClick={() => navigate('/')}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') navigate('/') }}
+        >
+          Back
+        </div>
         <div className="game1-canvas-wrap">
           <canvas ref={canvasRef} />
           {!running && (
